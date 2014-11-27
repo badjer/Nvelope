@@ -10,3 +10,4 @@ MetricResults
 *.zip
 Nvelope.VisualState.xml
 TestResult.xml
+*.user
