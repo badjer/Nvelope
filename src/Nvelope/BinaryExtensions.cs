@@ -32,7 +32,7 @@ namespace Nvelope
         /// </summary>
         public static string ToUtf8String(this byte[] values)
         {
-            return Encoding.UTF8.GetString(values);
+            return Encoding.UTF8.GetString(values, 0, values.Length);
         }
     }
 }

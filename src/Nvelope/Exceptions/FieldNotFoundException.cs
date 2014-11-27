@@ -7,13 +7,10 @@
 namespace Nvelope.Exceptions
 {
     using System;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
 
     /// <summary>
     /// Indicates that reflection couldn't find a field
     /// </summary>
-    [Serializable]
     public class FieldNotFoundException : Exception
     {
         #region These are just here for FxCop rules
@@ -47,17 +44,6 @@ namespace Nvelope.Exceptions
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the FieldNotFoundException class from serialized data
-        /// </summary>
-        /// <param name="info">Holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">Contains contextual information about the source or destination.</param>
-        /// <remarks>This is also one of those constructors we're supposed to provide</remarks>
-        protected FieldNotFoundException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
 
         #endregion
     }

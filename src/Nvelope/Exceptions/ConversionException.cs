@@ -7,14 +7,16 @@
 namespace Nvelope.Exceptions
 {
     using System;
+#if !PCL
     using System.Runtime.Serialization;
-    using System.Security.Permissions;
-    using Nvelope;
+#endif
 
     /// <summary>
     /// Indicates that an error has occured while doing a type conversion
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     public class ConversionException : Exception
     {
         #region These are just here for FxCop rules
@@ -48,6 +50,7 @@ namespace Nvelope.Exceptions
         {
         }
 
+#if !PCL
         /// <summary>
         /// Initializes a new instance of the ConversionException class from serialized data
         /// </summary>
@@ -59,6 +62,7 @@ namespace Nvelope.Exceptions
             : base(info, context)
         {
         }
+#endif
 
         #endregion
     }

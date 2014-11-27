@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if !PCL
+using System.Collections.Generic;
 using System.Web.UI.WebControls;
 
 namespace Nvelope.Web
@@ -15,3 +16,4 @@ namespace Nvelope.Web
         }
     }
 }
+#endif

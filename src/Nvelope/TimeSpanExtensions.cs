@@ -6,6 +6,7 @@
 
     public static class TimeSpanExtensions
     {
+#if !PCL
         /// <summary>
         /// Rounding conversion of TimeSpan to Years
         /// </summary>
@@ -13,6 +14,7 @@
         {
             return (source.TotalDays / 365).ConvertTo<decimal>().RoundTo().ConvertTo<int>();
         }
+#endif
 
         public static TimeSpan Multiply(this TimeSpan interval, int times) {
             var result = new TimeSpan(0);

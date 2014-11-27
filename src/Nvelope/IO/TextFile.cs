@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#if !PCL
+using System.IO;
 
 namespace Nvelope.IO
 {
@@ -36,3 +37,4 @@ namespace Nvelope.IO
         }
     }
 }
+#endif

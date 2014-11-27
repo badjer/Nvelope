@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if !PCL
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
@@ -649,3 +651,5 @@ namespace Nvelope
         #endregion
     }
 }
+
+#endif

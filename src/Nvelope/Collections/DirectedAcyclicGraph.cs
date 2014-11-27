@@ -17,7 +17,9 @@ namespace Nvelope.Collections
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix",
         Justification = "Graph suffix is good enough")]
+#if !PCL
     [Serializable]
+#endif
     public class DirectedAcyclicGraph<T> : IDirectedGraph<T>
     {
         private DirectedAcyclicGraph<T> parent;

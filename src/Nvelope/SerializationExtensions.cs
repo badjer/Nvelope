@@ -4,6 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if !PCL
 namespace Nvelope
 {
     using System.Runtime.Serialization;
@@ -26,3 +27,4 @@ namespace Nvelope
         }
     }
 }
+#endif

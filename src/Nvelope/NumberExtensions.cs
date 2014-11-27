@@ -100,6 +100,7 @@ namespace Nvelope
                 return start.To(int.MinValue, increment);
         }
 
+#if !PCL
         /// <summary>
         /// A wrapper around Decimal.Round
         /// </summary>
@@ -107,6 +108,7 @@ namespace Nvelope
         { 
             return Decimal.Round(number, decimalPlaces, roundingRule);
         }
+#endif
 
         /// <summary>
         /// Formats a rate as a percentage.
@@ -135,7 +137,7 @@ namespace Nvelope
             var parts = o.ToStringN().Split('.');
             if (parts.Count() == 1)
                 return parts.First();
-            else if (parts.Second().All(c => c == '0')) // if it's all 0s, drop the decimal part
+            else if (Regex.IsMatch(parts.Second(), "^0*$")) // if it's all 0s, drop the decimal part
                 return parts.First();
             else
                 return parts.First() + "." + Regex.Replace(parts.Second(), "0*$", ""); // trim off trailing 0s

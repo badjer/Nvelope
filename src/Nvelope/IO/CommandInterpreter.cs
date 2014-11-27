@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !PCL
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,9 @@ namespace Nvelope.IO
         public CommandInterpreter(TextWriter output, TextWriter error, CommandParser parser, object commandObject)
             : this(output, error, parser)
         {
-            commandObject.GetType().GetMethods().Each(mi => AddCommand(mi, commandObject));
+
+            var methods = commandObject.GetType().GetMethods();
+            methods.Each(mi => AddCommand(mi, commandObject));
         }
 
         public TextWriter Output;
@@ -390,6 +393,7 @@ namespace Nvelope.IO
             methodName = methodName ?? name;
 
             var mi = obj.GetType().GetMethod(methodName);
+
             AddCommand(mi, obj, name);
         }
 
@@ -428,7 +432,7 @@ namespace Nvelope.IO
             if (val is IEnumerable<string>)
             {
                 var strs = val as IEnumerable<string>;
-                strs.Each(str => output.WriteLine(str));
+                strs.Each(output.WriteLine);
             }
             else
                 output.WriteLine(val.Print());
@@ -501,3 +505,4 @@ namespace Nvelope.IO
         }
     }
 }
+#endif

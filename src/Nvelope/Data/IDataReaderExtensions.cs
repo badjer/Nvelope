@@ -1,4 +1,5 @@
-﻿namespace Nvelope.Data
+﻿#if !PCL
+namespace Nvelope.Data
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -75,3 +76,4 @@
 
     }
 }
+#endif

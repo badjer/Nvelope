@@ -43,12 +43,11 @@ namespace Nvelope.Reading
         /// </summary>
         private static Dictionary<Regex, Type> _infervertConversions = new Dictionary<Regex, Type>()
         {
-            {new Regex("^[0-9]+$", RegexOptions.Compiled), typeof(int)},
-            {new Regex("^[0-9]+\\.[0-9]+$", RegexOptions.Compiled), typeof(decimal)},
-            {new Regex("^[tT]rue|[Ff]alse$", RegexOptions.Compiled), typeof(bool)},
-            {new Regex("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$", 
-                RegexOptions.Compiled), typeof(DateTime)},
-            {new Regex(".*", RegexOptions.Compiled), typeof(string)}
+            {new Regex("^[0-9]+$"), typeof(int)},
+            {new Regex("^[0-9]+\\.[0-9]+$"), typeof(decimal)},
+            {new Regex("^[tT]rue|[Ff]alse$"), typeof(bool)},
+            {new Regex("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"), typeof(DateTime)},
+            {new Regex(".*"), typeof(string)}
         };
     }
 }

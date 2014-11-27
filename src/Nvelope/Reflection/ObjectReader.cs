@@ -90,16 +90,14 @@ namespace Nvelope.Reflection
         [CLSCompliant(false)]
         protected object _set(object instance, Dictionary<string, object> data)
         {
-            // TODO: Rename this method to make it CLS compliant
-            var include = MemberTypes.Field | MemberTypes.Property;
-            if (!this.SetFields)
-                include &= ~MemberTypes.Field;
-            if (!this.SetProperties)
-                include &= ~MemberTypes.Property;
-
             var members = instance._GetMembers().RemoveReadOnly();
+
             if (this.AttributeType != null) {
+#if !PCL
                 var mi = typeof(ReflectionExtensions).GetMethod("FilterAttributeType");
+#else
+                var mi = typeof(ReflectionExtensions).GetTypeInfo().DeclaredMethods.Single(m => m.Name == "FilterAttributeType");
+#endif
                 var filterRef = mi.MakeGenericMethod(this.AttributeType);
                 var args = new object[] { this.IncludeInheritedAttributes };
                 filterRef.Invoke(members, args);

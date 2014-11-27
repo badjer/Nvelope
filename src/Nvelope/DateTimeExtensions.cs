@@ -158,7 +158,7 @@ namespace Nvelope
                     showTime = false;
             }
 
-            return day + (showTime ? " @ " + date.ToShortTimeString() : "");
+            return day + (showTime ? " @ " + date.ToString("h:mm tt") : "");
         }
 
         /// <summary>

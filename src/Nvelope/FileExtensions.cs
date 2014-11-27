@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#if !PCL
+using System.IO;
 using System.Security.Cryptography;
 
 namespace Nvelope
@@ -19,3 +20,4 @@ namespace Nvelope
         }
     }
 }
+#endif

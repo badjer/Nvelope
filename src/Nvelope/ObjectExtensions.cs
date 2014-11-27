@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+#if !PCL
 using System.Collections.Specialized;
 using System.Data;
+#endif
 using Nvelope.Reflection;
 using System.Collections;
 using System.Collections.Generic;
@@ -91,8 +93,10 @@ namespace Nvelope
                 return ((decimal)o).PrintDecimal(); // Decimals don't do ToString in a reasonable way
             else if (type == typeof(string))
                 return o.ToStringN(); // This is to prevent the compiler from calling the IEnumerable<char> verison for strings
+#if !PCL
             else if (type == typeof(NameValueCollection))
                 return ((NameValueCollection)o).ToDictionary().Print();
+#endif
             else if (type.Implements<IDictionary>())
                 return ((IDictionary)o).PrintDict();
             else if (type.Implements<IEnumerable>())
@@ -109,10 +113,12 @@ namespace Nvelope
             else if (o is Capture)
                 return ((Capture)o).Value; // Regex capture
 
+#if !PCL
             else if (o is DataTable)
                 return "(" + ((DataTable)o).Rows.ToList().Select(l => l.Print()).Join(",") + ")";
             else if (o is DataRow)
                 return ((DataRow)o).ToDictionary().Print();
+#endif
             else
                 return o.ToStringN();
         }

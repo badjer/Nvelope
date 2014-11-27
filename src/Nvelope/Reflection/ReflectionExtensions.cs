@@ -20,14 +20,23 @@ namespace Nvelope.Reflection
         {
             if (type.IsNullable())
                 // try to convert to the underlying base type instead
+#if !PCL
                 type = type.GetGenericArguments()[0];
+#else
+                type = type.GenericTypeArguments[0];
+#endif
 
             return type;
         }
 
         public static bool IsNullable(this Type type)
         {
+#if !PCL
             return type.IsGenericType && type.GetGenericTypeDefinition().Name == "Nullable`1";
+#else
+            var ti = type.GetTypeInfo();
+            return ti.IsGenericType && ti.GetGenericTypeDefinition().Name == "Nullable`1";
+#endif
         }
 
 
@@ -45,13 +54,21 @@ namespace Nvelope.Reflection
         public static object GetFieldValue(this object source,
             string fieldName, bool careAboutCase = true)
         {
+#if PCL
+            var typeInfo = source.GetType().GetTypeInfo();
+            var members = typeInfo.DeclaredMembers.Where(mi =>
+                string.Equals(mi.Name, fieldName,
+                    careAboutCase ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase))
+                .ToList();
+#else
             var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
             if (!careAboutCase)
                 bindingFlags |= BindingFlags.IgnoreCase;
-
             Type type = source.GetType();
             var members = type.GetMember(fieldName, bindingFlags);
-            if (members.Count() == 0)
+#endif
+
+            if (!members.Any())
             {
                 throw new FieldNotFoundException("Missing field '" + fieldName + "'");
             }
@@ -102,6 +119,7 @@ namespace Nvelope.Reflection
             return (T)GetFieldValue(source, fieldName).ConvertTo(typeof(T));
         }
 
+#if !PCL
         /// <summary>
         /// Get and object's members.
         /// 
@@ -126,6 +144,17 @@ namespace Nvelope.Reflection
             return obj.GetType().GetMembers(bind).Where(
                 m => types.HasFlag(m.MemberType));
         }
+#else
+        public static IEnumerable<MemberInfo> _GetMembers(this object obj)
+        {
+            var typeInfo = obj.GetType().GetTypeInfo();
+            var props = typeInfo.DeclaredProperties.Where(pi => pi.GetMethod.IsPublic && !pi.GetMethod.IsStatic)
+                .Select(mi => mi as MemberInfo);
+            var fields = typeInfo.DeclaredFields.Where(fi => fi.IsPublic && !fi.IsStatic)
+                .Select(mi => mi as MemberInfo);
+            return props.Concat(fields);
+        }
+#endif
 
 
         /// <summary>
@@ -266,17 +295,15 @@ namespace Nvelope.Reflection
             if (source is Dictionary<string, object>)
                 return _AsDictionary(source as Dictionary<string, object>);
 
-            var include = MemberTypes.Field | MemberTypes.Property;
-            if (!includeFields)
-                include &= ~MemberTypes.Field;
-            if (!includeProperties)
-                include &= ~MemberTypes.Property;
-
-            var members = source._GetMembers(include).Where(m => m.Fieldlike());
+            var members = source._GetMembers().Where(m => m.Fieldlike());
 
             if (attributeType != null)
             {
+#if !PCL
                 var mi = typeof(ReflectionExtensions).GetMethod("FilterAttributeType");
+#else
+                var mi = typeof(ReflectionExtensions).GetTypeInfo().DeclaredMethods.Single(m => m.Name == "FilterAttributeType");
+#endif
                 var filterRef = mi.MakeGenericMethod(attributeType);
                 var args = new object[] { includeInheritedAttributes };
                 filterRef.Invoke(members, args);
@@ -361,7 +388,11 @@ namespace Nvelope.Reflection
         {
             Type type = source.GetType();
 
+#if !PCL
             var property = type.GetProperty(fieldName);
+#else
+            var property = type.GetTypeInfo().DeclaredProperties.Where(pi => pi.Name == fieldName).SingleOr(null);
+#endif
 
             if (property != null)
             {
@@ -373,7 +404,11 @@ namespace Nvelope.Reflection
             }
             else
             { // Try a field
+#if !PCL
                 var field = type.GetField(fieldName);
+#else
+                var field = type.GetTypeInfo().DeclaredFields.Where(fi => fi.Name == fieldName).SingleOr(null);
+#endif
                 if (field != null)
                     if (value.CanConvertTo(field.FieldType))
                         field.SetValue(source, value.ConvertTo(field.FieldType));
@@ -613,7 +648,11 @@ namespace Nvelope.Reflection
 
         private static bool _s_implements(Type type, Type interfaceType)
         {
+#if !PCL
             return type.GetInterfaces().Contains(interfaceType);
+#else
+            return type.GetTypeInfo().ImplementedInterfaces.Contains(interfaceType);
+#endif
         }
 
         /// <summary>

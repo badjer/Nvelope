@@ -2,7 +2,7 @@
 // <copyright file="TypeExtensions.cs" company="TWU">
 // </copyright>
 // -----------------------------------------------------------------------
-
+#if !PCL
 namespace Nvelope
 {
     using System;
@@ -92,3 +92,4 @@ namespace Nvelope
         }
     }
 }
+#endif

@@ -23,9 +23,11 @@ namespace Nvelope.Data
             : base(overrides, source, returnDefaultIfMissing, returnNullForExceptions)
         { }
 
+#if !PCL
         public DataProxy(NameValueCollection overrides, object source = null, bool returnDefaultIfMissing = false, bool returnNullForExceptions = false)
             : base(overrides.ToDictionary(), source, returnDefaultIfMissing, returnNullForExceptions)
         { }
+#endif
     }
 
     /// <summary>

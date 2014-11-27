@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !PCL
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -77,3 +78,4 @@ namespace Nvelope.Security
         }
     }
 }
+#endif

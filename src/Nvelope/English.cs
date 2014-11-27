@@ -1,4 +1,5 @@
-﻿namespace Nvelope
+﻿#if !PCL
+namespace Nvelope
 {
     using System;
     using System.Collections.Generic;
@@ -101,3 +102,4 @@
         }
     }
 }
+#endif

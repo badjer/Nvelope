@@ -244,8 +244,16 @@ namespace Nvelope.IO
             foreach (var kv in convertedArgs)
             {
                 var arg = expectedArgs.Single(a => a.Name == kv.Key);
-                if (kv.Value != null && !(arg.Type.IsAssignableFrom(kv.Value.GetType())))
-                    yield return new ParseError() { Argument = arg, ArgName = kv.Key, Value = kv.Value };
+                if (kv.Value != null)
+                {
+#if !PCL
+                    var isAssignable = arg.Type.IsAssignableFrom(kv.Value.GetType());
+#else
+                    var isAssignable = arg.Type.GetTypeInfo().IsAssignableFrom(kv.Value.GetType().GetTypeInfo());
+#endif
+                    if (!isAssignable)
+                        yield return new ParseError() {Argument = arg, ArgName = kv.Key, Value = kv.Value};
+                }
 
                 // If the argument is required, and it's null, that's an error too
                 if (!arg.IsOptional && kv.Value == null)

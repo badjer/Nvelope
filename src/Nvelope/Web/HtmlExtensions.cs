@@ -1,4 +1,5 @@
-﻿namespace Nvelope.Web
+﻿#if !PCL
+namespace Nvelope.Web
 {
     using System;
     using System.Globalization;
@@ -62,3 +63,4 @@
         }
     }
 }
+#endif

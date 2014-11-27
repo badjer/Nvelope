@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿#if !PCL
+using System.Diagnostics;
 using System.IO;
 
 namespace Nvelope.IO
@@ -48,3 +49,4 @@ namespace Nvelope.IO
         }
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !PCL
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -129,3 +130,4 @@ namespace Nvelope.Configuration
         }
     }
 }
+#endif

@@ -212,7 +212,7 @@ namespace Nvelope
             return String.IsNullOrEmpty(source);
         }
 
-        private static readonly Regex _tokenizeRegex = new Regex("^\\s*([^\\s]+)", RegexOptions.Compiled);
+        private static readonly Regex _tokenizeRegex = new Regex("^\\s*([^\\s]+)");
         /// <summary>
         /// Splits the string by spaces
         /// </summary>

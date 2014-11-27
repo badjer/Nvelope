@@ -104,7 +104,7 @@ namespace Nvelope
 
             if (DateTime.TryParse(
                 source,
-                CultureInfo.GetCultureInfo("en-US"),
+                new CultureInfo("en-US"),
                 DateTimeStyles.AllowWhiteSpaces,
                 out res))
             {
@@ -223,6 +223,7 @@ namespace Nvelope
             }
         }
 
+#if !PCL
         /// <summary>
         /// Is the string convertible to XML? If so, doc will hold the resultant document
         /// </summary>
@@ -252,11 +253,17 @@ namespace Nvelope
             doc.LoadXml(xmlString.ChopStart(Environment.NewLine).Replace("&", "&amp;"));
             return doc;
         }
+#endif
 
         public static object TryEnum(Type type, object source)
         {
+#if !PCL
             if (!type.IsEnum)
                 return null;
+#else
+            if (!type.GetTypeInfo().IsEnum)
+                return null;
+#endif
 
             object res;
             if (Enum.GetUnderlyingType(type) == typeof(int) && source.CanConvertTo<int>())
@@ -286,17 +293,31 @@ namespace Nvelope
                 return null;
 
             Type sourceType = null;
+#if PCL
+            TypeInfo sourceTypeInfo = null;
+            TypeInfo typeInfo = type.GetTypeInfo();
+#endif
 
             // Maybe it's already the correct type
             if (source != null)
             {
                 sourceType = source.GetType();
+#if PCL
+                sourceTypeInfo = sourceType.GetTypeInfo();
+#endif
+#if !PCL
                 if (sourceType == type || sourceType.IsSubclassOf(type))
                     return source;
+#else
+                if(sourceType == type || sourceTypeInfo.IsSubclassOf(type))
+                    return source;
+#endif
             }
 
+#if !PCL
             if (source == DBNull.Value)
                 source = null;
+#endif
 
             // If we're trying to convert to object, just return the thing
             if (type == typeof(object))
@@ -311,8 +332,12 @@ namespace Nvelope
                 if (source == null)
                     return source;
 
+#if !PCL
                 // try to convert to the underlying base type instead
                 type = type.GetGenericArguments()[0];
+#else
+                type = typeInfo.GenericTypeArguments[0];
+#endif
 
                 if (sourceString != null)
                 {
@@ -351,8 +376,10 @@ namespace Nvelope
                 }
                 else if (type == typeof(Guid))
                     return new Guid(sourceString);
+#if !PCL
                 else if (type == typeof(XmlDocument))
                     return sourceString.ToXml();
+#endif
                 else if (type == typeof(decimal))
                 {
                     // If it's in scientific notation, convert to double, then to decimal
@@ -381,14 +408,25 @@ namespace Nvelope
             catch (ArgumentNullException) { }
 
             // If the type is assignable, we can just do a cast
+#if !PCL
             if (type.IsAssignableFrom(sourceType))
                 return source;
+#else
+            if(typeInfo.IsAssignableFrom(sourceType.GetTypeInfo()))
+                return source;
+#endif
 
             // Last ditch effort - look at the constructors for the class, and see if there's a 
             // constructor that takes our input type
             ConstructorInfo constructor = null;
             if (sourceType != null)
+#if !PCL
                 constructor = type.GetConstructor(new Type[] { sourceType });
+#else
+                constructor = typeInfo.DeclaredConstructors
+                    .Where(ci => ci.GetParameters().Length == 1 && ci.GetParameters()[0].ParameterType == sourceType)
+                    .SingleOr(null);
+#endif
 
             if (constructor != null)
             {

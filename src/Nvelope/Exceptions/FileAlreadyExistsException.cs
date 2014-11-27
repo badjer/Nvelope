@@ -8,13 +8,16 @@ namespace Nvelope.Exceptions
 {
     using System;
     using System.IO;
+#if !PCL
     using System.Runtime.Serialization;
-    using System.Security.Permissions;
+#endif
 
     /// <summary>
     /// Tried to over-write a file but the file alreay exists
     /// </summary>
+#if !PCL
     [Serializable]
+#endif
     public class FileAlreadyExistsException : IOException
     {
         public string FileName { get; set; }
@@ -53,6 +56,7 @@ namespace Nvelope.Exceptions
         {
         }
 
+#if !PCL
         /// <summary>
         /// Initializes a new instance of the FileAlreadyExistsException class from serialized data
         /// </summary>
@@ -64,6 +68,7 @@ namespace Nvelope.Exceptions
             : base(info, context)
         {
         }
+#endif
 
         #endregion        
 
