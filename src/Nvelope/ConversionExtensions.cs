@@ -317,6 +317,11 @@ namespace Nvelope
 #if !PCL
             if (source == DBNull.Value)
                 source = null;
+#else
+			// PCL can't reference DBNull, but we could still be passed an object
+			// that is DBNull if this lib is referenced from non-PCL code
+			if(sourceType != null && sourceType.Name == "DBNull")
+				source = null;
 #endif
 
             // If we're trying to convert to object, just return the thing
