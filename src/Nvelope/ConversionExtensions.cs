@@ -412,7 +412,7 @@ namespace Nvelope
             if (type.IsAssignableFrom(sourceType))
                 return source;
 #else
-            if(typeInfo.IsAssignableFrom(sourceType.GetTypeInfo()))
+            if(sourceType != null && typeInfo.IsAssignableFrom(sourceType.GetTypeInfo()))
                 return source;
 #endif
 
