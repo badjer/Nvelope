@@ -190,6 +190,12 @@ namespace Nvelope.Tests
         }
 
         [Test]
+        public void CanConvertTo()
+        {
+            Assert.False("asdf".CanConvertTo<Guid>());
+        }
+
+        [Test]
         public void Enum_to_int()
         {
             Assert.AreEqual(1, TestEnum.One.ConvertTo<int>());
