@@ -27,6 +27,12 @@ namespace Nvelope
                 return (int)age.TotalSeconds + " " + (age.TotalSeconds > 1 ? "Secs" : "Sec");
         }
 
+        /// <summary>
+        /// Takes the time and returns a *different* datetime by changing the kind of time without taking into account the offset.
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns>different</returns>
+        [Obsolete("Behaves oppositely to ToUniversalTime() in framework")]
         public static DateTime ToUtc(this DateTime date)
         {
             return
