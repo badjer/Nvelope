@@ -119,7 +119,6 @@ namespace Nvelope.Reflection
             return (T)GetFieldValue(source, fieldName).ConvertTo(typeof(T));
         }
 
-#if !PCL
         /// <summary>
         /// Get and object's members.
         /// 
@@ -134,27 +133,25 @@ namespace Nvelope.Reflection
         /// <param name="types">Flags for the types of fields returned</param>
         /// <param name="binding">Miscellaneous options</param>
         /// <returns></returns>
-        public static IEnumerable<MemberInfo> _GetMembers(this object obj,
-            MemberTypes types = MemberTypes.Property | MemberTypes.Field,
-            BindingFlags bind = BindingFlags.Instance | BindingFlags.Public)
+        public static IEnumerable<MemberInfo> _GetMembers(this object obj)
         {
             if (obj == null)
                 return new List<MemberInfo>();
+#if !PCL
+            var bind = BindingFlags.Instance | BindingFlags.Public;
+            var types = MemberTypes.Property | MemberTypes.Field;
 
             return obj.GetType().GetMembers(bind).Where(
                 m => types.HasFlag(m.MemberType));
-        }
 #else
-        public static IEnumerable<MemberInfo> _GetMembers(this object obj)
-        {
             var typeInfo = obj.GetType().GetTypeInfo();
             var props = typeInfo.DeclaredProperties.Where(pi => pi.GetMethod.IsPublic && !pi.GetMethod.IsStatic)
                 .Select(mi => mi as MemberInfo);
             var fields = typeInfo.DeclaredFields.Where(fi => fi.IsPublic && !fi.IsStatic)
                 .Select(mi => mi as MemberInfo);
             return props.Concat(fields);
-        }
 #endif
+        }
 
 
         /// <summary>

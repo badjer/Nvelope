@@ -39,7 +39,7 @@ namespace Nvelope.Tests.Reflection
             var members = dh._GetMembers();
             var declare = members.FieldDeclarations();
             Assert.AreEqual(typeof(Color), declare["Paint"]);
-            var allmembers = dh._GetMembers(MemberTypes.All);
+            var allmembers = dh._GetMembers();
             var fields = allmembers.FieldDeclarations();
             Assert.AreEqual("([Paint,System.Drawing.Color],[Rooms,System.String[]],[Size,System.Int32],[Spam,System.String])",
                 fields.Print());
