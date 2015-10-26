@@ -258,6 +258,11 @@ namespace Nvelope.Reflection
             Type attributeType = null, bool includeInheritedAttributes = true,
             bool includeReadOnlyProperties = true)
         {
+            // Special case - handle Dict<string, string>
+            // Underlying method already handles Dict<string,object>
+            if (source is Dictionary<string, string>)
+                source = (source as Dictionary<string, string>).SelectVals(v => v as object);
+
             // Fake polymorphism here
             // If there's a variable of type object, but it actually contains a dictionary, then make sure we call
             // the version of _AsDictionary that just returns a copy of the dictionary, instead of digging up the 
@@ -286,6 +291,25 @@ namespace Nvelope.Reflection
             return _AsDictionary(source, members.Names());
         }
 
+        public static IEnumerable<string> DefaultFieldNames(object obj)
+        {
+            if (obj is Dictionary<string, object>)
+            {
+                var dictObj = obj as Dictionary<string, object>;
+                return dictObj.Keys;
+            }
+            if (obj is Dictionary<string, string>)
+            {
+                var dictObj = obj as Dictionary<string,string>;
+                return dictObj.Keys;
+            }
+
+            var members = ReflectionExtensions._GetMembers(obj);
+            var fieldMembers = members.Where(ReflectionExtensions.Fieldlike);
+            var fieldNames = ReflectionExtensions.Names(fieldMembers).ToList();
+            return fieldNames;
+        }
+
         /// <summary>
         /// Converts the object to key-value pairs. If the object is a dictionary, a subset of the 
         /// dictionary will be returned
@@ -295,6 +319,11 @@ namespace Nvelope.Reflection
         /// <returns></returns>
         public static Dictionary<string, object> _AsDictionary(this object source, IEnumerable<string> fieldNames)
         {
+            // Special case - handle Dict<string, string>
+            // Underlying method already handles Dict<string,object>
+            if (source is Dictionary<string, string>)
+                source = (source as Dictionary<string, string>).SelectVals(v => v as object);
+
             // Fake polymorphism here
             // If there's a variable of type object, but it actually contains a dictionary, then make sure we call
             // the version of _AsDictionary that just returns a copy of the dictionary, instead of digging up the 
@@ -304,6 +333,7 @@ namespace Nvelope.Reflection
                 return _AsDictionary(source as Dictionary<string, object>, fieldNames);
 
             Dictionary<string, object> res = new Dictionary<string, object>();
+            fieldNames = fieldNames ?? DefaultFieldNames(source);
             foreach (var field in fieldNames)
                 res.Add(field, source.GetFieldValue(field));
             return res;

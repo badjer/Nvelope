@@ -133,6 +133,24 @@ namespace Nvelope.Tests.Reflection
         }
 
         [Test]
+        public void _AsDictionary_stringString()
+        {
+            var data = new Dictionary<string, string>() {{ "a", "aVal" }};
+            object obj = data;
+            var res = obj._AsDictionary();
+            Assert.AreEqual("([a,aVal])", res.Print());
+        }
+
+        [Test]
+        public void _AsDictionary_nullFields()
+        {
+            var data = new Dictionary<string, object> { { "a", "aVal" } };
+            object obj = data;
+            var res = obj._AsDictionary(null);
+            Assert.AreEqual("([a,aVal])", res.Print());
+        }
+
+        [Test]
         public void _AsDictionary_WithFields_KeepsAsDictionaryPolymorphically()
         {
             var data = new Dictionary<string, object>();
