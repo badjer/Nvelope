@@ -291,7 +291,7 @@ namespace Nvelope.Reflection
             return _AsDictionary(source, members.Names());
         }
 
-        public static IEnumerable<string> DefaultFieldNames(object obj)
+        public static IEnumerable<string> DefaultFieldNames(object obj, bool includeReadonly = true)
         {
             if (obj is Dictionary<string, object>)
             {
@@ -306,7 +306,9 @@ namespace Nvelope.Reflection
 
             var members = ReflectionExtensions._GetMembers(obj);
             var fieldMembers = members.Where(ReflectionExtensions.Fieldlike);
-            var fieldNames = ReflectionExtensions.Names(fieldMembers).ToList();
+            if (!includeReadonly)
+                fieldMembers = fieldMembers.RemoveReadOnly();
+            var fieldNames = fieldMembers.Names().ToList();
             return fieldNames;
         }
 
@@ -452,24 +454,17 @@ namespace Nvelope.Reflection
         public static T _SetFrom<T>(this T source, object data, bool caseSensitive = true, IEnumerable<string> fields = null) where T : class
         {
             // We can't have a default parameter be an expression, so convert it from null to soemthing useful here
-            if (fields == null)
-                fields = data._GetMembers().RemoveReadOnly().Names();
-            // Filter down to just those fields that were included
+            fields = fields ?? DefaultFieldNames(data);
 
-            // If it's already a Dict<string,object>, then just filter down to the keys we want
-            // I'm not sure this is actually the best behaviour, it makes more sense just to
-            // require a non-dictionary.
-            var dataDict = data as Dictionary<string, object>;
-            if (dataDict != null)
-            {
-                dataDict = dataDict.WhereKeys(f => fields.Contains(f));
-            }
-            else
-            {
-                dataDict = data._AsDictionary();
-            }
+            var neededFields = fields;
+            // If we're case sensitive, filter down to just those fields that exist on the source and dest
+            // Don't do this if we're not case-sensitive, since we might need non-matching fields
+            if (caseSensitive)
+                neededFields = fields.Intersect(DefaultFieldNames(source, includeReadonly: false)); 
 
-            return _SetFrom(source, dataDict, caseSensitive);
+            var dataDict = data._AsDictionary(neededFields);
+
+            return _SetFrom(source, dataDict, caseSensitive, neededFields);
         }
 
         /// <summary>

@@ -222,6 +222,15 @@ namespace Nvelope.Tests.Reflection
             Assert.True(typeof(Dictionary<string, object>).Implements<IDictionary>());
             Assert.False(typeof(int).Implements<IDictionary>());
         }
+
+        [Test]
+        public void _SetFrom_isLazy()
+        {
+            var source = new ABClass() { A = "AVal", B = "BVal" };
+            var dest = new ACClass()._SetFrom(source);
+            Assert.AreEqual("([A,AVal],[C,])", dest._AsDictionary().Print());
+            Assert.AreEqual(0, source.BAccessCount);
+        }
     }
 
     public class DollHouse
@@ -266,5 +275,19 @@ namespace Nvelope.Tests.Reflection
     public class DummyAttribute : System.Attribute
     {
         public DummyAttribute() { }
+    }
+
+    public class ACClass
+    {
+        public string A { get; set; }
+        public string C { get; set; }
+    }
+
+    public class ABClass
+    {
+        public int BAccessCount = 0;
+        public string A { get; set; }
+        private string _b;
+        public string B { get { BAccessCount++; return _b; } set { _b = value; } }
     }
 }
