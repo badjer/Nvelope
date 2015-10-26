@@ -40,6 +40,108 @@ namespace Nvelope
             return !obj.Eq(other);
         }
 
+        /// <summary>
+        /// Try to call CompareTo on 2 objects - do type conversion if necessary
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="other"></param>
+        /// <param name="throwOnUncomparable">Throw an exception if the objects can't be compared?</param>
+        /// <returns>null if only one arg is null, or if objects aren't comparable. Else the value of obj.CompareTo(other)</returns>
+        public static int? LazyCompare(this object obj, object other, bool throwOnUncomparable = false)
+        {
+            // Handle nulls
+            if (obj == null && other == null)
+                return 0;
+
+            if (other == null || obj == null)
+                return null;
+
+            var typeObj = obj.GetType();
+            var typeOther = other.GetType();
+
+            // This is a bit involved.
+            // We want to find an implementation of IComparable on one of the objects that we can use to
+            // do the comparison. We'll take anything we can get, but we'd prefer to NOT use string.CompareTo
+            // if possible - everything can be converted to string, but not always in a meaningful way, so that
+            // means that doing a string compare on the objects is not ideal.
+            if (typeObj == typeOther && obj is IComparable)
+                return (obj as IComparable).CompareTo(other);
+            else if (!(obj is string) && obj is IComparable && other.CanConvertTo(typeObj))
+                return (obj as IComparable).CompareTo(other.ConvertTo(typeObj));
+            else if (!(other is string) && other is IComparable && obj.CanConvertTo(typeOther))
+                return -1 * (other as IComparable).CompareTo(obj.ConvertTo(typeOther));
+            else if (obj is IComparable && other.CanConvertTo(typeObj))
+                return (obj as IComparable).CompareTo(other.ConvertTo(typeObj));
+            else if (other is IComparable && obj.CanConvertTo(typeOther))
+                return -1 * (other as IComparable).CompareTo(obj.ConvertTo(typeOther));
+
+
+            if (throwOnUncomparable)
+                throw new InvalidOperationException("Could not compare the two objects: " + obj + " and " + other);
+
+            return null;
+        }
+
+        /// <summary>
+        /// Try to figure out if obj is &lt; other - do type conversion if necessary
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="other"></param>
+        /// <param name="throwOnUncomparable">Throw an exception if the values can't be compared?</param>
+        /// <returns>null if one of the args is null, or if the args can't be compared. Else the value of obj.CompareTo(other)</returns>
+        public static bool? LazyLt(this object obj, object other, bool throwOnUncomparable = false)
+        {
+            var compRes = LazyCompare(obj, other, throwOnUncomparable);
+            if (compRes == null)
+                return null;
+            return compRes.Value < 0;
+        }
+
+        /// <summary>
+        /// Try to figure out if obj is &lt;= other - do type conversion if necessary
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="other"></param>
+        /// <param name="throwOnUncomparable">Throw an exception if the values can't be compared?</param>
+        /// <returns>null if one of the args is null, or if the args can't be compared. Else the value of obj.CompareTo(other)</returns>
+        public static bool? LazyLtEq(this object obj, object other, bool throwOnUncomparable = false)
+        {
+            var compRes = LazyCompare(obj, other, throwOnUncomparable);
+            if (compRes == null)
+                return null;
+            return compRes.Value <= 0;
+        }
+
+        /// <summary>
+        /// Try to figure out if obj is &gt; other - do type conversion if necessary
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="other"></param>
+        /// <param name="throwOnUncomparable">Throw an exception if the values can't be compared?</param>
+        /// <returns>null if one of the args is null, or if the args can't be compared. Else the value of obj.CompareTo(other)</returns>
+        public static bool? LazyGt(this object obj, object other, bool throwOnUncomparable = false)
+        {
+            var compRes = LazyCompare(obj, other, throwOnUncomparable);
+            if (compRes == null)
+                return null;
+            return compRes.Value > 0;
+        }
+
+        /// <summary>
+        /// Try to figure out if obj is &gt;= other - do type conversion if necessary
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="other"></param>
+        /// <param name="throwOnUncomparable">Throw an exception if the values can't be compared?</param>
+        /// <returns>null if one of the args is null, or if the args can't be compared. Else the value of obj.CompareTo(other)</returns>
+        public static bool? LazyGtEq(this object obj, object other, bool throwOnUncomparable = false)
+        {
+            var compRes = LazyCompare(obj, other, throwOnUncomparable);
+            if (compRes == null)
+                return null;
+            return compRes.Value >= 0;
+        }
+
         public static bool LazyEq(this object obj, object other)
         {
             // Handle nulls

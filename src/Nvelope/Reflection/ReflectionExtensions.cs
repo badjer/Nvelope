@@ -284,6 +284,11 @@ namespace Nvelope.Reflection
             Type attributeType = null, bool includeInheritedAttributes = true,
             bool includeReadOnlyProperties = true)
         {
+            // Special case - handle Dict<string, string>
+            // Underlying method already handles Dict<string,object>
+            if (source is Dictionary<string, string>)
+                source = (source as Dictionary<string, string>).SelectVals(v => v as object);
+
             // Fake polymorphism here
             // If there's a variable of type object, but it actually contains a dictionary, then make sure we call
             // the version of _AsDictionary that just returns a copy of the dictionary, instead of digging up the 
@@ -310,6 +315,27 @@ namespace Nvelope.Reflection
             return _AsDictionary(source, members.Names());
         }
 
+        public static IEnumerable<string> DefaultFieldNames(object obj, bool includeReadonly = true)
+        {
+            if (obj is Dictionary<string, object>)
+            {
+                var dictObj = obj as Dictionary<string, object>;
+                return dictObj.Keys;
+            }
+            if (obj is Dictionary<string, string>)
+            {
+                var dictObj = obj as Dictionary<string,string>;
+                return dictObj.Keys;
+            }
+
+            var members = ReflectionExtensions._GetMembers(obj);
+            var fieldMembers = members.Where(ReflectionExtensions.Fieldlike);
+            if (!includeReadonly)
+                fieldMembers = fieldMembers.RemoveReadOnly();
+            var fieldNames = fieldMembers.Names().ToList();
+            return fieldNames;
+        }
+
         /// <summary>
         /// Converts the object to key-value pairs. If the object is a dictionary, a subset of the 
         /// dictionary will be returned
@@ -319,6 +345,11 @@ namespace Nvelope.Reflection
         /// <returns></returns>
         public static Dictionary<string, object> _AsDictionary(this object source, IEnumerable<string> fieldNames)
         {
+            // Special case - handle Dict<string, string>
+            // Underlying method already handles Dict<string,object>
+            if (source is Dictionary<string, string>)
+                source = (source as Dictionary<string, string>).SelectVals(v => v as object);
+
             // Fake polymorphism here
             // If there's a variable of type object, but it actually contains a dictionary, then make sure we call
             // the version of _AsDictionary that just returns a copy of the dictionary, instead of digging up the 
@@ -328,6 +359,7 @@ namespace Nvelope.Reflection
                 return _AsDictionary(source as Dictionary<string, object>, fieldNames);
 
             Dictionary<string, object> res = new Dictionary<string, object>();
+            fieldNames = fieldNames ?? DefaultFieldNames(source);
             foreach (var field in fieldNames)
                 res.Add(field, source.GetFieldValue(field));
             return res;
@@ -454,24 +486,17 @@ namespace Nvelope.Reflection
         public static T _SetFrom<T>(this T source, object data, bool caseSensitive = true, IEnumerable<string> fields = null) where T : class
         {
             // We can't have a default parameter be an expression, so convert it from null to soemthing useful here
-            if (fields == null)
-                fields = data._GetMembers().RemoveReadOnly().Names();
-            // Filter down to just those fields that were included
+            fields = fields ?? DefaultFieldNames(data);
 
-            // If it's already a Dict<string,object>, then just filter down to the keys we want
-            // I'm not sure this is actually the best behaviour, it makes more sense just to
-            // require a non-dictionary.
-            var dataDict = data as Dictionary<string, object>;
-            if (dataDict != null)
-            {
-                dataDict = dataDict.WhereKeys(f => fields.Contains(f));
-            }
-            else
-            {
-                dataDict = data._AsDictionary();
-            }
+            var neededFields = fields;
+            // If we're case sensitive, filter down to just those fields that exist on the source and dest
+            // Don't do this if we're not case-sensitive, since we might need non-matching fields
+            if (caseSensitive)
+                neededFields = fields.Intersect(DefaultFieldNames(source, includeReadonly: false)); 
 
-            return _SetFrom(source, dataDict, caseSensitive);
+            var dataDict = data._AsDictionary(neededFields);
+
+            return _SetFrom(source, dataDict, caseSensitive, neededFields);
         }
 
         /// <summary>

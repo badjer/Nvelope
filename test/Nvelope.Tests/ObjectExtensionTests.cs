@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 
 namespace Nvelope.Tests
 {
@@ -28,6 +29,16 @@ namespace Nvelope.Tests
             Assert.True(a.LazyEq(b));
             b = "1";
             Assert.True(a.LazyEq(b));
+        }
+
+        [Test]
+        public void LazyCompare()
+        {
+            var dt = new DateTime(2015, 6, 1);
+            Assert.Greater(dt.LazyCompare("2015-01-01"), 0);
+            Assert.Less(dt.LazyCompare("2016-01-01"), 0);
+            Assert.Less("2015-01-01".LazyCompare(dt), 0);
+            Assert.Greater("2016-01-01".LazyCompare(dt), 0);
         }
 
         [Test]

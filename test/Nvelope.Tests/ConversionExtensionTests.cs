@@ -190,8 +190,9 @@ namespace Nvelope.Tests
         }
 
         [Test]
-        public void CanConvertTo()
+        public void CanConvertTo_Guid()
         {
+            Assert.True("aaaaaaaa-1111-2222-eeee-000000000000".CanConvertTo<Guid>());
             Assert.False("asdf".CanConvertTo<Guid>());
         }
 
