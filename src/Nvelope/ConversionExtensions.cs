@@ -467,22 +467,6 @@ namespace Nvelope
             }
             catch (ConversionException)
             {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Can we convert this value to some other type?
-        /// </summary>
-        public static bool CanConvertTo<T>(this object source)
-        {
-            try
-            {
-                ConvertTo<T>(source);
-                return true;
-            }
-            catch (ConversionException)
-            {
                 // This is for if we're trying to convert from a string to an enum
                 // and there is no enum value that corresponds to that string
                 return false;
@@ -495,7 +479,14 @@ namespace Nvelope
             {
                 return false;
             }
+        }
 
+        /// <summary>
+        /// Can we convert this value to some other type?
+        /// </summary>
+        public static bool CanConvertTo<T>(this object source)
+        {
+            return CanConvertTo(source, typeof(T));
         }
 
         /// <summary>
