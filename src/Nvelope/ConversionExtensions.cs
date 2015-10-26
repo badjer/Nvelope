@@ -448,6 +448,10 @@ namespace Nvelope
             {
                 return false;
             }
+            catch (FormatException)
+            {
+                return false;
+            }
 
         }
 

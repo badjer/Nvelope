@@ -190,6 +190,13 @@ namespace Nvelope.Tests
         }
 
         [Test]
+        public void CanConvertTo_Guid()
+        {
+            Assert.True("aaaaaaaa-1111-2222-eeee-000000000000".CanConvertTo<Guid>());
+            Assert.False("foo".CanConvertTo<Guid>());
+        }
+
+        [Test]
         public void Enum_to_int()
         {
             Assert.AreEqual(1, TestEnum.One.ConvertTo<int>());
